@@ -35,6 +35,17 @@ export const contentBlocks = pgTable("content_blocks", {
   id: uuid("id").defaultRandom().primaryKey(),
   lessonId: uuid("lesson_id").references(() => lessons.id, { onDelete: 'cascade' }).notNull(),
   type: text("type").notNull(), // 'text', 'sheet_music', 'audio_clip'
-  content: jsonb("content").notNull(), 
+  content: jsonb("content").notNull(),
   order: integer("order").notNull().default(0),
+});
+
+// 5. PRICING PLANS
+export const pricingPlans = pgTable("pricing_plans", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  courseId: uuid("course_id").references(() => courses.id, { onDelete: 'cascade' }).notNull(),
+  title: text("title").notNull(),
+  price: integer("price").notNull(), // Store in cents (e.g., 4900 = $49.00)
+  currency: text("currency").default("USD").notNull(),
+  features: jsonb("features").notNull(), // Array of feature strings
+  isPopular: boolean("is_popular").default(false),
 });

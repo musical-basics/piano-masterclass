@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as dotenv from "dotenv";
-import { courses, sections, lessons, contentBlocks } from "./schema";
+import { courses, sections, lessons, contentBlocks, pricingPlans } from "./schema";
 
 dotenv.config({ path: ".env.local" });
 
@@ -10,6 +10,10 @@ const db = drizzle(sql);
 
 async function seed() {
     console.log("🌱 Seeding database...");
+
+    // Clean up existing data first
+    console.log("🧹 Cleaning up existing data...");
+    await db.delete(courses);
 
     // 1. Create Course
     const [course] = await db
@@ -56,7 +60,7 @@ async function seed() {
             {
                 lessonId: lesson.id,
                 type: "video",
-                content: { videoId: "demo-video-id" },
+                content: { videoId: "5806a65e-42b2-430d-b191-f569a91e27ce" },
                 order: 0,
             },
             {
@@ -79,6 +83,31 @@ async function seed() {
         .returning();
 
     console.log(`✅ Created ${blocks.length} content blocks`);
+
+    // 5. Create Pricing Plans
+    const plans = await db
+        .insert(pricingPlans)
+        .values([
+            {
+                courseId: course.id,
+                title: "Monthly Access",
+                price: 2900, // $29.00
+                currency: "USD",
+                features: ["Access to all lessons", "New content monthly"],
+                isPopular: false,
+            },
+            {
+                courseId: course.id,
+                title: "Lifetime Membership",
+                price: 19700, // $197.00
+                currency: "USD",
+                features: ["One-time payment", "Downloadable sheet music", "Priority Support"],
+                isPopular: true,
+            },
+        ])
+        .returning();
+
+    console.log(`✅ Created ${plans.length} pricing plans`);
 
     console.log("\n🎉 Seeding complete!");
 }

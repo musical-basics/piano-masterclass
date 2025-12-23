@@ -10,9 +10,10 @@ import type { CourseData } from "@/lib/data"
 
 interface LearnClientProps {
     course: CourseData
+    bunnyLibraryId: string
 }
 
-export function LearnClient({ course }: LearnClientProps) {
+export function LearnClient({ course, bunnyLibraryId }: LearnClientProps) {
     // Find the first lesson to set as default
     const firstLesson = course.sections[0]?.lessons[0]
     const [currentLessonId, setCurrentLessonId] = useState(firstLesson?.id || "")
@@ -96,6 +97,7 @@ export function LearnClient({ course }: LearnClientProps) {
                         onTogglePiP={() => setIsPiPActive(!isPiPActive)}
                         lessonTitle={currentLesson?.title || ""}
                         contentBlocks={currentLesson?.contentBlocks || []}
+                        bunnyLibraryId={bunnyLibraryId}
                     />
                 </div>
             </div>

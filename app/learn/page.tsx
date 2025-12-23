@@ -3,6 +3,7 @@ import { LearnClient } from "@/components/learn-client"
 
 export default async function LearnPage() {
   const course = await getCourseData()
+  const bunnyLibraryId = process.env.BUNNY_LIBRARY_ID || ""
 
   if (!course) {
     return (
@@ -15,6 +16,5 @@ export default async function LearnPage() {
     )
   }
 
-  return <LearnClient course={course} />
+  return <LearnClient course={course} bunnyLibraryId={bunnyLibraryId} />
 }
-

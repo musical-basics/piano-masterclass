@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { VideoPlayer } from "@/components/blocks/VideoPlayer"
 
 interface ContentBlock {
   id: string
@@ -30,6 +31,7 @@ interface StudentContentProps {
   onTogglePiP: () => void
   lessonTitle: string
   contentBlocks: ContentBlock[]
+  bunnyLibraryId: string
 }
 
 export function StudentContent({
@@ -39,95 +41,43 @@ export function StudentContent({
   onTogglePiP,
   lessonTitle,
   contentBlocks,
+  bunnyLibraryId,
 }: StudentContentProps) {
-  const [isPlaying, setIsPlaying] = useState(false)
+  // Find video content block
+  const videoBlock = contentBlocks.find((block) => block.type === "video")
+  const videoId = videoBlock?.content?.videoId as string | undefined
 
   return (
     <main className="relative flex flex-col">
       <div
         className={cn(
           "sticky top-0 z-40 bg-background",
-          isPiPActive && "relative", // Disable sticky when PiP is active
+          isPiPActive && "relative",
         )}
       >
         <div className="w-full md:max-w-5xl md:mx-auto md:p-6 md:pb-0">
-          <div
-            className={cn(
-              "relative aspect-video bg-zinc-900 md:rounded-xl border-b md:border border-border/50 overflow-hidden group transition-all",
-              isPiPActive &&
-              "fixed bottom-20 right-4 md:bottom-24 md:right-6 w-64 md:w-80 aspect-video z-50 shadow-2xl shadow-black/50 rounded-xl border",
-            )}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-br from-daw-purple/5 to-daw-cyan/5" />
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-20 h-20 rounded-full bg-daw-purple/20 backdrop-blur-sm border border-daw-purple/50 flex items-center justify-center hover:bg-daw-purple/30 hover:scale-105 transition-all glow-purple"
-              >
-                {isPlaying ? (
-                  <Pause className="w-8 h-8 text-white" fill="currentColor" />
-                ) : (
-                  <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
-                )}
-              </button>
+          {videoId && bunnyLibraryId ? (
+            <div
+              className={cn(
+                "md:rounded-xl overflow-hidden transition-all",
+                isPiPActive &&
+                "fixed bottom-20 right-4 md:bottom-24 md:right-6 w-64 md:w-80 z-50 shadow-2xl shadow-black/50 rounded-xl"
+              )}
+            >
+              <VideoPlayer
+                videoId={videoId}
+                libraryId={bunnyLibraryId}
+                title={lessonTitle}
+              />
             </div>
-
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="text-white hover:text-daw-purple transition-colors"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                </button>
-
-                <div className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden cursor-pointer group/progress">
-                  <div className="h-full w-1/3 bg-daw-purple rounded-full relative">
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity" />
-                  </div>
-                </div>
-
-                <span className="font-mono text-xs text-white/80">
-                  <span className="text-white">3:24</span> / 10:24
-                </span>
-
-                <button className="text-white/80 hover:text-white transition-colors">
-                  <Volume2 className="w-5 h-5" />
-                </button>
-
-                <button
-                  onClick={onTogglePiP}
-                  className={cn("text-white/80 hover:text-white transition-colors", isPiPActive && "text-daw-cyan")}
-                  title="Picture in Picture"
-                >
-                  <PictureInPicture2 className="w-5 h-5" />
-                </button>
-
-                <button className="text-white/80 hover:text-white transition-colors">
-                  <Maximize2 className="w-5 h-5" />
-                </button>
+          ) : (
+            <div className="relative aspect-video bg-zinc-900 md:rounded-xl border-b md:border border-border/50 overflow-hidden flex items-center justify-center">
+              <div className="text-center">
+                <Play className="w-12 h-12 text-daw-purple/50 mx-auto mb-2" />
+                <p className="text-muted-foreground text-sm">No video available for this lesson</p>
               </div>
             </div>
-
-            <div className="absolute top-4 left-4 right-4 flex items-start justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-              <div>
-                <p className="text-xs text-white/60 uppercase tracking-wider">Now Playing</p>
-                <h2 className="text-lg font-semibold text-white">{lessonTitle}</h2>
-              </div>
-            </div>
-
-            {!isPiPActive && (
-              <button
-                onClick={onTogglePiP}
-                className="absolute top-4 right-4 p-2 rounded-lg bg-black/50 backdrop-blur-sm border border-white/10 text-white/80 hover:text-white hover:bg-black/70 transition-all"
-                title="Float video"
-              >
-                <PictureInPicture2 className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
