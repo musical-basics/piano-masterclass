@@ -45,15 +45,11 @@ export async function POST(request: NextRequest) {
 
         const data = await response.json()
 
-        // Return the video GUID and auth signature for direct upload
+        // Return the full Bunny response (includes guid, presignedSignature, etc.)
         return NextResponse.json({
-            videoId: data.guid,
+            ...data,
             libraryId: libraryId,
-            // The signature is used for TUS upload authentication
-            // For TUS uploads, you need the video GUID and library ID
-            // The actual upload URL is: https://video.bunnycdn.com/tusupload
             uploadUrl: `https://video.bunnycdn.com/tusupload`,
-            expirationTime: Date.now() + 3600000, // 1 hour from now
         })
     } catch (error) {
         console.error("Error creating Bunny video:", error)
