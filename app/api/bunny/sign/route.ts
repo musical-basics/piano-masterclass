@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createHash } from "crypto"
 
 export async function POST(request: NextRequest) {
     try {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Create a new video in Bunny.net library
+        // Step 1: Create a new video in Bunny.net library
         const response = await fetch(
             `https://video.bunnycdn.com/library/${libraryId}/videos`,
             {
@@ -44,11 +45,21 @@ export async function POST(request: NextRequest) {
         }
 
         const data = await response.json()
+        const videoId = data.guid
 
-        // Return the full Bunny response (includes guid, presignedSignature, etc.)
+        // Step 2: Generate presigned signature for TUS upload
+        // Signature = SHA256(library_id + api_key + expiration_time + video_id)
+        const expirationTime = Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+
+        const signatureString = `${libraryId}${apiKey}${expirationTime}${videoId}`
+        const signature = createHash("sha256").update(signatureString).digest("hex")
+
+        // Return the video info and upload credentials
         return NextResponse.json({
-            ...data,
+            videoId: videoId,
             libraryId: libraryId,
+            authorizationSignature: signature,
+            authorizationExpire: expirationTime,
             uploadUrl: `https://video.bunnycdn.com/tusupload`,
         })
     } catch (error) {

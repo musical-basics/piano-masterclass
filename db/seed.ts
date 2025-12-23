@@ -51,7 +51,7 @@ async function seed() {
         })
         .returning();
 
-    console.log(`✅ Created lesson: ${lesson.title}`);
+    console.log(`✅ Created lesson: ${lesson.title} (ID: ${lesson.id})`);
 
     // 4. Create Content Blocks
     const blocks = await db
