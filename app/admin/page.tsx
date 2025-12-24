@@ -1,57 +1,52 @@
-"use client"
+import { db } from "@/db"
+import { courses, sections, lessons } from "@/db/schema"
+import { eq, asc } from "drizzle-orm"
+import { AdminClient } from "@/components/admin/admin-client"
+import { redirect } from "next/navigation"
 
-import { useState, useEffect } from "react"
-import { CurriculumSidebar } from "@/components/curriculum-sidebar"
-import { LessonCanvas } from "@/components/lesson-canvas"
-import { BlockToolbox } from "@/components/block-toolbox"
-import { Header } from "@/components/header"
+export const metadata = {
+    title: "Admin Dashboard | Course Editor",
+    description: "Manage your course curriculum",
+}
 
-export default function CourseEditor() {
-    const [selectedLessonId, setSelectedLessonId] = useState("l1")
-    const [isSaving, setIsSaving] = useState(false)
-    const [isUploading, setIsUploading] = useState(false)
-    const [uploadProgress, setUploadProgress] = useState(0)
+export default async function AdminPage() {
+    // Fetch the first course (for now, assuming single course)
+    const [course] = await db
+        .select()
+        .from(courses)
+        .limit(1)
 
-    // Simulate save functionality
-    const handleSave = () => {
-        setIsSaving(true)
-        setTimeout(() => setIsSaving(false), 1500)
+    if (!course) {
+        // No course exists, could redirect to a setup page
+        redirect("/")
     }
 
-    // Simulate upload progress
-    useEffect(() => {
-        if (isUploading) {
-            const interval = setInterval(() => {
-                setUploadProgress((prev) => {
-                    if (prev >= 100) {
-                        setIsUploading(false)
-                        return 0
-                    }
-                    return prev + 5
-                })
-            }, 150)
-            return () => clearInterval(interval)
-        }
-    }, [isUploading])
+    // Fetch all sections with their lessons
+    const sectionsData = await db
+        .select()
+        .from(sections)
+        .where(eq(sections.courseId, course.id))
+        .orderBy(asc(sections.order))
 
-    const handleAddBlock = (type: string) => {
-        if (type === "video") {
-            // Simulate video upload
-            setIsUploading(true)
-            setUploadProgress(0)
-        }
-        // In a real app, you would add the block to state here
-    }
+    // Fetch all lessons
+    const lessonsData = await db
+        .select()
+        .from(lessons)
+        .orderBy(asc(lessons.order))
+
+    // Group lessons by section
+    const sectionsWithLessons = sectionsData.map(section => ({
+        ...section,
+        lessons: lessonsData
+            .filter(lesson => lesson.sectionId === section.id)
+            .sort((a, b) => a.order - b.order),
+    }))
 
     return (
-        <div className="h-screen flex flex-col bg-background">
-            <Header onSave={handleSave} isSaving={isSaving} />
-
-            <div className="flex-1 flex overflow-hidden">
-                <CurriculumSidebar selectedLessonId={selectedLessonId} onSelectLesson={setSelectedLessonId} />
-                <LessonCanvas uploadProgress={uploadProgress} isUploading={isUploading} />
-                <BlockToolbox onAddBlock={handleAddBlock} />
-            </div>
-        </div>
+        <AdminClient
+            courseId={course.id}
+            courseTitle={course.title}
+            sections={sectionsWithLessons}
+        />
     )
 }
