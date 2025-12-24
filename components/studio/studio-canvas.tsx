@@ -5,6 +5,7 @@ import { GripVertical, Trash2, Type, Video, Music2, FileText, Play, Pause } from
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { VideoUploader } from "./VideoUploader"
+import { PDFUploader } from "./PDFUploader"
 import { updateBlock, deleteBlock } from "@/lib/actions/studio"
 
 interface ContentBlock {
@@ -188,36 +189,12 @@ export function StudioCanvas({ blocks, lessonId, bunnyLibraryId, onBlocksChange 
                                 )}
 
                                 {block.type === "sheet_music" && (
-                                    <div className="space-y-3">
-                                        {block.content.pdfUrl ? (
-                                            <>
-                                                <iframe
-                                                    src={`${block.content.pdfUrl}#view=FitH`}
-                                                    className="w-full h-[400px] rounded-lg bg-white"
-                                                    title="Sheet Music PDF"
-                                                />
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="w-full border-dashed border-border hover:border-daw-pink hover:text-daw-pink transition-colors gap-2 bg-transparent"
-                                                >
-                                                    Replace PDF
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <div className="aspect-[4/3] rounded-lg bg-secondary/50 border border-dashed border-border/50 flex flex-col items-center justify-center gap-4">
-                                                <Music2 className="w-10 h-10 text-daw-pink/50" />
-                                                <p className="text-sm text-muted-foreground">No PDF uploaded</p>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="border-dashed border-border hover:border-daw-pink hover:text-daw-pink transition-colors gap-2 bg-transparent"
-                                                >
-                                                    Upload PDF
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <PDFUploader
+                                        blockId={block.id}
+                                        existingPdfUrl={block.content.pdfUrl as string | undefined}
+                                        existingFilename={block.content.filename as string | undefined}
+                                        onUploadComplete={() => onBlocksChange()}
+                                    />
                                 )}
 
                                 {block.type === "audio" && (
