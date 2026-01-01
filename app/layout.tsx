@@ -7,6 +7,11 @@ import "./globals.css"
 const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
+import { db } from "@/db"
+import { lessons } from "@/db/schema"
+import { asc } from "drizzle-orm"
+import { DebugNav } from "@/components/debug-nav"
+
 export const metadata: Metadata = {
   title: "Music Course Studio | DAW Dashboard",
   description: "High-tech music production curriculum editor",
@@ -30,14 +35,22 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Fetch the first lesson for fixed navigation
+  const [firstLesson] = await db
+    .select()
+    .from(lessons)
+    .orderBy(asc(lessons.order))
+    .limit(1)
+
   return (
     <html lang="en" className="dark">
       <body className={`font-sans antialiased`}>
+        <DebugNav firstLessonId={firstLesson?.id || ""} />
         {children}
         <Analytics />
       </body>

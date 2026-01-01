@@ -73,8 +73,11 @@ export default async function SalesPage() {
     isPopular: plan.isPopular ?? false,
   }))
 
+  // Get the first lesson ID for the Studio link
+  const firstLessonId = sectionsWithLessons[0]?.lessons[0]?.id || ""
+
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background relative">
       <HeroSection videoId={trailerVideoId} bunnyLibraryId={bunnyLibraryId} />
       <WhatYouGetSection />
       <CurriculumPreview sections={sectionsWithLessons} />
